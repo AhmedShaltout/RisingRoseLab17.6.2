@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+import application.Backup;
 import application.ControlPanel;
 import classes.Exceptions;
 import classes.Group;
@@ -770,5 +771,9 @@ public class ControlePanel implements Initializable{
 	
 	public void searchGroup(Event event){
 		groupsTable.setItems(FXCollections.observableList(DB.getAllGroups(((TextField)event.getSource()).getText())));
+	}
+	
+	public void backups(Event event){
+		new Backup();
 	}
 }

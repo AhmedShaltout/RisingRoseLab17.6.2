@@ -12,7 +12,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.WindowEvent;
 
 	
@@ -26,9 +25,6 @@ public class SignIn implements Initializable {
 		}catch(Exception e ){
 			System.out.println(e.getMessage());
 		}
-		Main.window.setTitle("RisingRoseLab17.6.2");
-		Main.window.getIcons().add(new Image("/design/atom5.png"));
-		Main.window.show();
 		Main.window.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent event) {

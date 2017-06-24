@@ -22,22 +22,29 @@ import javafx.collections.ObservableList;
 public abstract class DB {
 
 	private static Connection con;
-
+	private static String DB;
+	public static void setDB(String s){
+		DB=s;
+	}
+	public static String getDB(){
+		return DB;
+	}
 	private static void getConnection(){
 		try{
-			con= DriverManager.getConnection("jdbc:sqlite:src/controllers/work.db");
+			con= DriverManager.getConnection("jdbc:sqlite:src/controllers/"+DB+"");
 		}
 		catch(SQLException ex){
+			
 		}
 	}
-
+	
 	private static void closeCon(){
 		try {
 			con.close();
 		} catch (SQLException e) {
 		}
 	}
-
+	
 	/**==========================================================================================**/
 	
 	private static ResultSet select(String sql){
@@ -68,7 +75,7 @@ public abstract class DB {
 		ResultSet result=select("select * from user where user.name='"+username+"'");
 		try {
 			if(result.next()){
-				User user=new User(result.getInt("id"),result.getString("name"),result.getShort("role"),result.getString("password"));
+				User user=new User(result.getInt(1),result.getString(2),result.getShort(3),result.getString(4));
 				closeCon();
 				return user;
 			}
@@ -96,7 +103,7 @@ public abstract class DB {
 
 	private static Test createTest(ResultSet resultSet) {
 		try {
-			return new Test(resultSet.getInt("testId"), resultSet.getString("name"), resultSet.getString("comment"),resultSet.getShort("hours"), resultSet.getFloat("price"));
+			return new Test(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(5),resultSet.getShort(4), resultSet.getFloat(3));
 		} catch (SQLException e) {
 			return null;
 		}
@@ -112,7 +119,7 @@ public abstract class DB {
 		ResultSet resultSet=select("select MAX(groupId)Id from GroupT");
 		try {
 			resultSet.next();
-			groupId=resultSet.getLong("Id")+1;
+			groupId=resultSet.getLong(1)+1;
 			closeCon();
 		} catch (SQLException | NullPointerException e) {
 			groupId=(long) 1;
@@ -138,7 +145,7 @@ public abstract class DB {
 		ResultSet resultSet=select("select Max(Test.testId)ID from Test");
 		try {
 			resultSet.next();
-			Long x=resultSet.getLong("ID")+1;
+			Long x=resultSet.getLong(1)+1;
 			closeCon();
 			return x;
 		} catch (SQLException |NullPointerException e) {
@@ -162,7 +169,7 @@ public abstract class DB {
 
 	private static Group createGroup(ResultSet set) {
 		try {
-			return new Group(set.getInt("groupId"), set.getInt("NoTests"), set.getString("groupName"), set.getFloat("groupPrice"), set.getFloat("grouphours"));
+			return new Group(set.getInt(1), set.getInt(5), set.getString(2), set.getFloat(3), set.getFloat(4));
 		} catch (SQLException e) {
 			return null;
 		}
@@ -203,7 +210,7 @@ public abstract class DB {
 			editDataBase("insert into TestGroup(testId,groupId)values("+x.getTestId()+","+Id+")");
 		return true;
 	}
-
+	
 	public static boolean updateTest(int testId, String name, float hours, String comment, float price) {
 		boolean x= editDataBase("update Test set name='"+name+"', price="+price+", hours="+hours+",comment='"+comment+"' where testId="+testId+"");
 		editDataBase("delete from Normal where testId="+testId+"");
@@ -451,7 +458,7 @@ public abstract class DB {
 	}
 	private static int saveProcess(int patientId, float price,float paid, Long[] tests,
 			Integer[] groups,String outDate){
-		int x=DB.getNextProcess();
+		int x=getNextProcess();
 		String sql="insert into ProcessGroup(processId,groupId)values";
 		int length=groups.length;
 		for (int i = 0; i < length; i++) {
@@ -636,10 +643,14 @@ public abstract class DB {
 		closeCon();
 		return processes;
 	}
-
+	
 	private static Process createProcess(ResultSet resultSet) {
 		try {
 			return new Process(resultSet.getInt(1), resultSet.getString(4), resultSet.getString(5), resultSet.getFloat(3), resultSet.getFloat(6));
 		} catch (SQLException|NullPointerException e) {return null;}
+	}
+	
+	public static void payForProcess(Integer processId, Float pay) {
+		editDataBase("update Process set processPaid = processPaid+"+pay+" where Process.processId="+processId+"");
 	}
 }

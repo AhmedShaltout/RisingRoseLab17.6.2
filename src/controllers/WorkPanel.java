@@ -68,7 +68,7 @@ public class WorkPanel implements Initializable {
 	@FXML
 	TableColumn<Process,Integer>patientHistoryId;
 	@FXML
-	TableColumn<Process,String>patientHistoryInDate,patientHistoryOutDate,patientHistoryDetails,patientHistoryPrint;
+	TableColumn<Process,String>patientHistoryInDate,patientHistoryOutDate,patientHistoryDetails,patientHistoryPrint,patientHistoryPay;
 	@FXML
 	TableColumn<Process,Float>patientHistoryPrice,patientHistoryPaid;
 	@FXML
@@ -155,6 +155,7 @@ public class WorkPanel implements Initializable {
 		patientHistoryOutDate.setCellValueFactory(new PropertyValueFactory<>("processOutDate"));
 		patientHistoryDetails.setCellValueFactory(new PropertyValueFactory<>("processDetails"));
 		patientHistoryPrint.setCellValueFactory(new PropertyValueFactory<>("processPrint"));
+		patientHistoryPay.setCellValueFactory(new PropertyValueFactory<>("processPay"));
 		patientHistoryPrice.setCellValueFactory(new PropertyValueFactory<>("processPrice"));
 		patientHistoryPaid.setCellValueFactory(new PropertyValueFactory<>("processPaid"));
 		patientHistory.getSelectionModel().setCellSelectionEnabled(true);
@@ -186,6 +187,9 @@ public class WorkPanel implements Initializable {
 						}
 		        	}else if(val.toString().equals("Print")){
 		        		Exceptions.showInfo("Will add printer later");
+		        	}else if(val.toString().equals("Pay")){
+		        		Exceptions.getPaid(process.getProcessId());patientHistory.setItems(FXCollections.observableList(DB.getPatientProcess(x)));
+		        		patientHistory.refresh();
 		        	}
 				}
 			}
@@ -194,7 +198,10 @@ public class WorkPanel implements Initializable {
 		
 	}
 	
-
+	public static void pay(Integer processId,Float pay){
+		DB.payForProcess(processId,pay);
+	}
+	private int x=0;
 	private ListChangeListener<? super Patient> patientListTableListener() {
 		return new ListChangeListener<Patient>(){
 
@@ -202,7 +209,8 @@ public class WorkPanel implements Initializable {
 			public void onChanged(javafx.collections.ListChangeListener.Change<? extends Patient> c) {
 				Patient patient;
 				if((patient=patientListTable.getSelectionModel().getSelectedItem())!=null){
-					patientHistory.setItems(FXCollections.observableList(DB.getPatientProcess(patient.getPatientId())));
+					x=patient.getPatientId();
+					patientHistory.setItems(FXCollections.observableList(DB.getPatientProcess(x)));
 				}
 			}
 			

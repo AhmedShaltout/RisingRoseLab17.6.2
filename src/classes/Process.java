@@ -1,7 +1,7 @@
 package classes;
 
 public class Process {
-	private int processId;	private String processInDate,processOutDate,processPrint="Print",processDetails="Check";
+	private int processId;	private String processInDate,processOutDate,processPrint="Print",processDetails="Check",processPay="Pay";
 	private float processPrice,processPaid;
 
 	public Process(int processId, String processInDate, String processOutDate,float processPrice,float processPaid) {
@@ -79,6 +79,16 @@ public class Process {
 
 	public void setProcessPaid(float processPaid) {
 		this.processPaid = processPaid;
+	}
+
+
+	public String getProcessPay() {
+		return this.processPay;
+	}
+
+
+	public void setProcessPay(String processPay) {
+		this.processPay = processPay;
 	}
 	
 	

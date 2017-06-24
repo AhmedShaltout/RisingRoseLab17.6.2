@@ -339,13 +339,14 @@
                <right>
                   <TableView fx:id="patientHistory" prefHeight="529.0" prefWidth="730.0" BorderPane.alignment="CENTER">
                     <columns>
-                      <TableColumn fx:id="patientHistoryId" prefWidth="98.0" text="Process ID" />
-                      <TableColumn fx:id="patientHistoryPrice" prefWidth="101.0" text="Price" />
-                        <TableColumn fx:id="patientHistoryPaid" prefWidth="81.0" text="Paid" />
-                        <TableColumn fx:id="patientHistoryInDate" prefWidth="140.0" text="In Date" />
-                        <TableColumn fx:id="patientHistoryOutDate" prefWidth="164.0" text="Out Date" />
-                        <TableColumn fx:id="patientHistoryPrint" prefWidth="52.0" text="Print" />
-                        <TableColumn fx:id="patientHistoryDetails" prefWidth="67.0" text="Details" />
+                      <TableColumn fx:id="patientHistoryId" prefWidth="83.0" text="Process ID" />
+                      <TableColumn fx:id="patientHistoryPrice" prefWidth="82.0" text="Price" />
+                        <TableColumn fx:id="patientHistoryPaid" prefWidth="78.0" text="Paid" />
+                        <TableColumn fx:id="patientHistoryInDate" prefWidth="136.0" text="In Date" />
+                        <TableColumn fx:id="patientHistoryOutDate" prefWidth="195.0" text="Out Date" />
+                        <TableColumn fx:id="patientHistoryPay" prefWidth="36.0" text="Pay" />
+                        <TableColumn fx:id="patientHistoryPrint" minWidth="1.0" prefWidth="43.0" text="Print" />
+                        <TableColumn fx:id="patientHistoryDetails" prefWidth="55.0" text="Details" />
                     </columns>
                   </TableView>
                </right>

@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import classes.Exceptions;
-import classes.Main;
 import classes.User;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -32,7 +31,6 @@ public class SignIn implements Initializable {
 		sign.setBackground(new Background(Loading.myBI));
 	}
 	public void signIn(Event event){
-		Main.window.setScene(Loading.load());
 		String username=user.getText(),pass=password.getText();
 		if(username!=null&&pass!=null){
 			User log=DB.getUser(username);
@@ -48,7 +46,6 @@ public class SignIn implements Initializable {
 		}
 	}
 	public void worker(){
-		Main.window.setScene(Loading.load());
 		application.SignIn.OpenWindowForWorker();
 	}
 
