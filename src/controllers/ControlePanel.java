@@ -117,8 +117,6 @@ public class ControlePanel implements Initializable{
 		newSourceDiscount.addEventFilter(KeyEvent.KEY_TYPED,Exceptions.numeric_Validation());
 		newSourceEditDiscount.addEventFilter(KeyEvent.KEY_TYPED,Exceptions.numeric_Validation());
 	}
-
-
 	public void logout(Event event){
 		ControlPanel.logout();
 	}
@@ -523,7 +521,8 @@ public class ControlePanel implements Initializable{
 					for (Node node : addVBox.getChildren()) {
 						float ageFrom =-1,ageTo=-1,normalFrom=-1,normalTo=-1;
 						String comment="-1";
-						short age=-1,sex=-1;
+						short age=-1;
+						short sex = -1;
 						for(Node elem:((GridPane)node).getChildren()){
 							int row=GridPane.getRowIndex(elem),col=GridPane.getColumnIndex(elem);
 							if(row==0&&col==1){

@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,7 +14,7 @@ public abstract class SystemCreator {
 	private static Connection con;
 	private static void getConnection(String s){
 		try{
-			con= DriverManager.getConnection("jdbc:sqlite:src/controllers/"+s+"");
+			con= DriverManager.getConnection("jdbc:sqlite:C:\\LabData\\"+s+"");
 		}
 		catch(Exception ex){
 			
@@ -92,10 +93,12 @@ public abstract class SystemCreator {
 				+ " `patientId` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
 				+ " `patientName` TEXT NOT NULL UNIQUE,"
 				+ " `patientAgeType` INTEGER NOT NULL,"
-				+ " `patientDOB` DATE NOT NULL )"		,
+				+ " `patientDOB` DATE NOT NULL,"
+				+ " `patientSex` INTEGER NOT NULL )"		,
 				"CREATE TABLE `PatientSource` ("
 				+ " `patientId` INTEGER NOT NULL,"
-				+ " `sourceId` INTEGER NOT NULL )"		,
+				+ " `sourceId` INTEGER NOT NULL"
+				+ ")"		,
 				"CREATE TABLE `Phone` ("
 				+ " `patientId` INTEGER NOT NULL,"
 				+ " `patientPhone` INTEGER NOT NULL )"	,
@@ -439,5 +442,9 @@ public abstract class SystemCreator {
 			editDataBase(n, sql);
 		}
 		
+	}
+	public static void createSystembase() {
+		new File("C:\\LabData").mkdir();
+		editDataBase("system.db", "CREATE TABLE `selectedDB` ( `name` DATETIME NOT NULL, `selected` BOOLEAN NOT NULL, PRIMARY KEY(`name`) )");
 	}
 }

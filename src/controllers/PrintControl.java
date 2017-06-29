@@ -6,7 +6,6 @@ import java.util.ResourceBundle;
 
 import application.Print;
 import classes.Result;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -28,6 +27,7 @@ public class PrintControl implements Initializable {
 	
 	@FXML
 	VBox printedBox;
+	private String name="";
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		printedBox.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY,Insets.EMPTY)));
@@ -64,27 +64,52 @@ public class PrintControl implements Initializable {
 	public void cancelPrinting(Event event){
 		Print.win.close();
 	}
-	@SuppressWarnings("unchecked")
+
 	private void makeSeparatedGrid() {
-		ObservableList<Result> separated=WorkPanel.separatedTests;
-		if(separated.size()>9){
-			ArrayList<Result> results=new ArrayList<>();
-			for (int i = 0; i < 9; i++) {
-				results.add(separated.remove(i));
+		ArrayList<Result> separated=WorkPanel.separatedTests;
+		ArrayList<ArrayList<Result>> grouped=WorkPanel.groupedTests;
+		ArrayList<String> groupedNames=WorkPanel.namesGroup;
+		if(!separated.isEmpty()){
+			int s=separated.size()/9;
+			ArrayList<Result>print =new ArrayList<>();
+			if(s>=9){
+				for(int z=0;z<9;z++){
+					print.add(separated.remove(z));
+				}
+				createGrid(print,false);
+				if(!separated.isEmpty())
+					new Print();
+			}else{
+				for (Result result : separated) {
+					print.add(result);
+				}
+				separated.removeAll(print);
+				createGrid(print,false);
+				new Print();
 			}
-			createGrid(results);
-			WorkPanel.separatedTests=separated;
-			new Print();
 		}
-		else{
-			createGrid((ArrayList<Result>) separated);
+		if(!grouped.isEmpty()){
+			if(!grouped.get(0).isEmpty()){
+				name=groupedNames.remove(0);
+				createGrid(grouped.remove(0),true);
+				if(!grouped.isEmpty())
+					new Print();
+			}
 		}
 	}
 
-	private void createGrid(ArrayList<Result> separated) {
+	private void createGrid(ArrayList<Result> arrayList,boolean isGroup) {
 		GridPane gridPane=new GridPane();
 		int row=0;
-		for (Result result :separated ) {
+		if(isGroup){
+			Label l= new Label(name);
+			l.setWrapText(true);
+			l.setMinHeight(40);
+			l.setFont(Font.font(18));
+			gridPane.add(l, 0, row);
+			row++;
+		}
+		for (Result result :arrayList ) {
 			Label l= new Label(result.getTestName());
 			l.setWrapText(true);
 			l.setMinHeight(40);
@@ -94,10 +119,10 @@ public class PrintControl implements Initializable {
 			l2.setFont(Font.font(18));
 			gridPane.add(l, 0, row);
 			gridPane.add(l2, 1, row);
-			gridPane.setHgap(150);
-			gridPane.setPadding(new Insets(0,0,0,70));
 			row++;
 		}
+		gridPane.setHgap(150);
+		gridPane.setPadding(new Insets(0,0,0,70));
 		printedBox.getChildren().add(gridPane);
 	}
 

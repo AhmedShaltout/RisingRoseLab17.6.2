@@ -83,7 +83,14 @@
                   <TextField fx:id="addPatientAge" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <TextField fx:id="addPatientPhone" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                   <MenuButton fx:id="addPatientSource" mnemonicParsing="false" text="Select" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                  <Button mnemonicParsing="false" onAction="#addNewPatient" text="Save" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                  <Button mnemonicParsing="false" onAction="#addNewPatient" text="Save" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <Label text="Sex" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+                  <MenuButton fx:id="addPatientSex" mnemonicParsing="false" text="Select" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#sexChanged" text="Male" />
+                      <MenuItem mnemonicParsing="false" onAction="#sexChanged" text="Female" />
+                    </items>
+                  </MenuButton>
                </children>
             </GridPane>
          </content>

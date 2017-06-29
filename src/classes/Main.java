@@ -31,6 +31,7 @@ public class Main extends Application {
 
 	public static void startAll() {
 		String db;
+		SystemCreator.createSystembase();
 		db=SystemCreator.createSystem();
 		DB.setDB(db);
 		new SignIn();

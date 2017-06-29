@@ -2,7 +2,6 @@ package controllers;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.ResourceBundle;
 
 import application.Print;
@@ -51,7 +50,7 @@ public class WorkPanel implements Initializable {
 	newProcessReference,newProcessPay,newProcessGroupSearch,newProcessTestSearch,addResultProcessId,
 	groupListName,processId,patientListPatientName,testListTestName;
 	@FXML
-	MenuButton addPatientAgeType,addPatientSource;
+	MenuButton addPatientAgeType,addPatientSource,addPatientSex;
 	@FXML
 	Label addPatientId,newProcessPatientName,newProcessPatientAge,newProcessPatientSource,
 	newProcessPatientId,newProcessOutDate;
@@ -97,10 +96,9 @@ public class WorkPanel implements Initializable {
 	@FXML BorderPane qq3,qq4,qq5,qq6,qq7,qq8;
 	
 
-	public static  ObservableList<Result> separatedTests;
+	public static  ArrayList<Result> separatedTests;
 	public static ArrayList<String> namesGroup;
 	public static ArrayList<ArrayList<Result>> groupedTests;
-	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -134,6 +132,7 @@ public class WorkPanel implements Initializable {
 		addResultTestTableValue.setCellFactory(TextFieldTableCell.forTableColumn());
 		addResultTestTableValue.setOnEditCommit(setEditableCell());
 		addResultTestTable.setEditable(true);
+		addResultTestTableValue.setOnEditCommit(ValueChecker(addResultTestTable));
 		groupsGroupId.setCellValueFactory(new PropertyValueFactory<>("groupId"));
 		groupsGroupName.setCellValueFactory(new PropertyValueFactory<>("groupName"));
 		groupsGroupPrice.setCellValueFactory(new PropertyValueFactory<>("groupPrice"));
@@ -198,6 +197,27 @@ public class WorkPanel implements Initializable {
 		
 	}
 	
+	private EventHandler<CellEditEvent<Result, String>> ValueChecker(TableView<Result> tableView) {
+		return new EventHandler<TableColumn.CellEditEvent<Result,String>>() {
+			
+			@Override
+			public void handle(CellEditEvent<Result, String> event) {
+				if(event!=null){
+					String newVal=event.getNewValue();
+					if(DB.resultOverNormal(currentProcess, event.getRowValue().getTestId(), newVal)){
+						Result s= event.getRowValue();
+						if(!newVal.contains("*")){
+							s.setTestValue(newVal+" *");
+						}else{
+							s.setTestValue(newVal);
+						}
+						tableView.refresh();
+					}
+				}
+			}
+		};
+	}
+
 	public static void pay(Integer processId,Float pay){
 		DB.payForProcess(processId,pay);
 	}
@@ -261,19 +281,19 @@ public class WorkPanel implements Initializable {
 		String s=((TextField)event.getSource()).getText();
 		if(Exceptions.isWord(s)){
 			ArrayList<Result> results=DB.getProcessTestsResult(Integer.parseInt(s));
-			if(!results.isEmpty()){
-				ProcessTableTests.setItems(FXCollections.observableList(results));
-				ArrayList<ArrayList<Result>>groups=DB.getProcessGroupsResult(Integer.parseInt(s));
-				groupsId=DB.groups;
-				ArrayList<String> groupsName=DB.groupsName;
-				int length=groupsId.size();
-				for (int i = 0; i < length; i++) {
-					GridPane grid=addGridToVBox(groups.get(i),groupsName.get(i),groupsId.get(i),false);
-					processVBox.getChildren().add(grid);
-				}
-			}else{
+			ProcessTableTests.setItems(FXCollections.observableList(results));
+			ArrayList<ArrayList<Result>>groups=DB.getProcessGroupsResult(Integer.parseInt(s));
+			groupsId=DB.groups;
+			ArrayList<String> groupsName=DB.groupsName;
+			int length=groupsId.size();
+			for (int i = 0; i < length; i++) {
+				GridPane grid=addGridToVBox(groups.get(i),groupsName.get(i),groupsId.get(i),false);
+				processVBox.getChildren().add(grid);
+			}
+			if(length==0 && results.isEmpty()){
 				Exceptions.showInfo("No such Process");
 				processId.setText("");
+				processVBox.getChildren().removeAll(processVBox.getChildren());
 			}
 		}
 	}
@@ -362,23 +382,12 @@ public class WorkPanel implements Initializable {
 				results.get(index).addAll(list);
 			}
 		}
-		index=-1;
-		for (ArrayList<Result> result : results) {
-			index++;
-			if(!result.isEmpty()){
-				System.out.println("The results of : "+groupsName.get(index));
-				for(Result r:result){
-					System.out.println(r);
-				}
-				System.out.println("------------------------------------------------");
-			}
-		}
-		System.out.println("Separated tests\n\n");
 		ObservableList<Result>results2=ProcessTableTests.getSelectionModel().getSelectedItems();
+		ArrayList<Result>results3=new ArrayList<>();
 		for (Result result : results2) {
-			System.out.println(result);
+			results3.add(result);
 		}
-		separatedTests=results2;
+		separatedTests=results3;
 		namesGroup=groupsName;
 		groupedTests=results;
 		new Print();
@@ -399,9 +408,16 @@ public class WorkPanel implements Initializable {
 	
 	public void addNewPatient(Event event){
 		String s[]={addPatientName.getText(),addPatientAge.getText()};
-		if(Exceptions.notEmpty(s)&&Exceptions.isWord(addPatientAgeType.getText())){
+		if(Exceptions.notEmpty(s)&&Exceptions.isWord(addPatientAgeType.getText())&&!addPatientSex.getText().equals("Select")){
 			int id=Integer.parseInt(addPatientId.getText());
-			if(DB.saveNewPatient(id,s[0],addPatientAgeType.getText(),Float.parseFloat(s[1]))){
+			String sex=addPatientSex.getText();
+			short sexId=-1;
+			if(sex.equals("Male"))
+				sexId=1;
+			else
+				sexId=0;
+				
+			if(DB.saveNewPatient(id,s[0],addPatientAgeType.getText(),Float.parseFloat(s[1]),sexId)){
 				if(Exceptions.isWord(addPatientPhone.getText())){
 					DB.addPatientPhone(id,addPatientPhone.getText());
 				}
@@ -450,17 +466,17 @@ public class WorkPanel implements Initializable {
 		if(Exceptions.isWord(addResultProcessId.getText())){
 			currentProcess=Integer.parseInt(addResultProcessId.getText());
 			addResultTestTable.setItems(FXCollections.observableList(DB.getProcessTestsResult(currentProcess)));
-			if(addResultTestTable.getItems().size()>0){
-				ArrayList<ArrayList<Result>> groups=DB.getProcessGroupsResult(currentProcess);
-				groupsId=DB.groups;
-				ArrayList<String> groupsName=DB.groupsName;
-				int length=groupsId.size();
-				for (int i = 0; i < length; i++) {
-					GridPane grid=addGridToVBox(groups.get(i),groupsName.get(i),groupsId.get(i),true);
-					addResultVBox.getChildren().add(grid);
-				}
-			}else{
+			ArrayList<ArrayList<Result>> groups=DB.getProcessGroupsResult(currentProcess);
+			groupsId=DB.groups;
+			ArrayList<String> groupsName=DB.groupsName;
+			int length=groupsId.size();
+			for (int i = 0; i < length; i++) {
+				GridPane grid=addGridToVBox(groups.get(i),groupsName.get(i),groupsId.get(i),true);
+				addResultVBox.getChildren().add(grid);
+			}
+			if(length==0&&addResultTestTable.getItems().size()==0){
 				addResultVBox.getChildren().removeAll(addResultVBox.getChildren());
+				addResultTestTable.getItems().removeAll(addResultTestTable.getItems());
 				Exceptions.showInfo("No such process");
 			}
 		}else{
@@ -524,6 +540,8 @@ public class WorkPanel implements Initializable {
 			value.setCellFactory(TextFieldTableCell.forTableColumn());
 			value.setOnEditCommit(setEditableCell());
 			tableView.setEditable(true);
+			value.setOnEditCommit(ValueChecker(tableView));
+			
 		}
 		tableView.getColumns().addAll(id,name,value);
 		grid.add(groupId, 0, 0);	grid.add(tableView, 0, 1);
@@ -585,7 +603,6 @@ public class WorkPanel implements Initializable {
 				}
 				
 			});
-			
 			addProcessSelectedTestTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Test>(){
 
 				@Override
@@ -606,6 +623,8 @@ public class WorkPanel implements Initializable {
 				
 			});
 		}
+		setOutDate();
+		calculateDiscount();
 	}
 
 	protected void calculateDiscount() {
@@ -762,6 +781,7 @@ public class WorkPanel implements Initializable {
 	}
 	
 	private void resetAddProcess() {
+		totalPrice=0f;
 		selectedGroups=new ArrayList<>();
 		selectedTests= new ArrayList<>();
 		newProcessPrice.setText("");
@@ -782,15 +802,20 @@ public class WorkPanel implements Initializable {
 	}
 
 	private void setOutDate() {
-		if(Exceptions.isWord(newProcessPrice.getText())&&Exceptions.isWord(newProcessPatientId.getText())){
-			ArrayList<Float>hours=new ArrayList<>();
-			for (Test test :selectedTests)
-				hours.add(test.getHoursTaken());
-			for(Group group:selectedGroups)
-				hours.add(group.getHours());
-			newProcessOutDate.setText(DB.getDateFromNow(Collections.max(hours)));
-		}else
-			newProcessOutDate.setText("Out date");
+		ArrayList<Float>hours=new ArrayList<>();
+		for (Test test :selectedTests)
+			hours.add(test.getHoursTaken());
+		for(Group group:selectedGroups)
+			hours.add(group.getHours());
+		Float max=0f;
+		for(Float hour:hours)
+			if(hour>max)
+				max=hour;
+		newProcessOutDate.setText(DB.getDateFromNow(max));
+	}
+	
+	public void sexChanged(Event event){
+		addPatientSex.setText(((MenuItem)event.getSource()).getText());
 	}
 
 }

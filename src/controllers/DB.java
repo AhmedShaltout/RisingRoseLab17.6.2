@@ -31,7 +31,7 @@ public abstract class DB {
 	}
 	private static void getConnection(){
 		try{
-			con= DriverManager.getConnection("jdbc:sqlite:src/controllers/"+DB+"");
+			con= DriverManager.getConnection("jdbc:sqlite:C:\\LabData\\"+DB+"");
 		}
 		catch(SQLException ex){
 			
@@ -80,6 +80,7 @@ public abstract class DB {
 				return user;
 			}
 		} catch (SQLException|NullPointerException e) {		}
+		closeCon();
 		return null;
 	}
 
@@ -149,6 +150,7 @@ public abstract class DB {
 			closeCon();
 			return x;
 		} catch (SQLException |NullPointerException e) {
+			closeCon();
 			return (long) 1;
 		}
 	}
@@ -282,6 +284,7 @@ public abstract class DB {
 				closeCon();
 				return x.toString();
 			} catch (SQLException |NullPointerException e) {
+				closeCon();
 				return "1";
 			}
 	}
@@ -314,7 +317,7 @@ public abstract class DB {
 		return groups;
 	}
 
-	public static boolean saveNewPatient(int patientId, String patientName, String ageType, float age) {
+	public static boolean saveNewPatient(int patientId, String patientName, String ageType, float age, short sexId) {
 		short t=0;
 		if(ageType.equals("Month"))
 			t=1;
@@ -322,8 +325,8 @@ public abstract class DB {
 			t=0;
 		else
 			t=2;
-		return editDataBase("insert into Patient(patientId,patientName,patientAgeType,patientDOB) values"
-				+ "("+patientId+",'"+patientName+"',"+t+",(select  date('now' ,'-"+age+" "+ageType+"')))");
+		return editDataBase("insert into Patient(patientId,patientName,patientAgeType,patientDOB,patientSex) values"
+				+ "("+patientId+",'"+patientName+"',"+t+",(select  date('now' ,'-"+age+" "+ageType+"')),"+sexId+")");
 	}
 
 	public static Long getNextPatientId() {
@@ -332,9 +335,9 @@ public abstract class DB {
 		try {
 			result.next();
 			x=result.getLong(1)+1;
-			closeCon();
 		} catch (SQLException |NullPointerException e) {
 		}
+		closeCon();
 		return x;
 	}
 
@@ -354,6 +357,7 @@ public abstract class DB {
 			closeCon();
 			return x;
 		} catch (SQLException|NullPointerException e) {
+			closeCon();
 			return -1;
 		}
 	}
@@ -421,8 +425,8 @@ public abstract class DB {
 		try {
 			result.next();
 			x= result.getString(1);
-			closeCon();
 		} catch (SQLException|NullPointerException e) {}
+		closeCon();
 		return Integer.parseInt((x.split("-"))[s]);
 		
 	}
@@ -435,7 +439,10 @@ public abstract class DB {
 			String s=result.getString(1);
 			closeCon();
 			return s;
-		} catch (SQLException|NullPointerException e) { return "No Source";}
+		} catch (SQLException|NullPointerException e) {
+			closeCon();
+			return "No Source";
+			}
 		
 	}
 
@@ -447,6 +454,7 @@ public abstract class DB {
 			closeCon();
 			return x/100f;
 		} catch (SQLException|NullPointerException e) {
+			closeCon();
 			return 0f;
 		}
 	}
@@ -491,6 +499,7 @@ public abstract class DB {
 			closeCon();
 			return x;
 		} catch (SQLException|NullPointerException e) {
+			closeCon();
 			return 1;
 		}
 	}
@@ -652,5 +661,39 @@ public abstract class DB {
 	
 	public static void payForProcess(Integer processId, Float pay) {
 		editDataBase("update Process set processPaid = processPaid+"+pay+" where Process.processId="+processId+"");
+	}
+	public static short getPatientAgeType(int currentProcess) {
+		ResultSet result=select("select patientAgeType from Patient inner join Process on Patient.patientId =Process.patientId "
+				+ "where Process.processId="+currentProcess+"");
+		try {
+			result.next();
+			short x= result.getShort(1);
+			closeCon();
+			return x;
+		} catch (SQLException|NullPointerException e) {
+		}
+		closeCon();
+		return -1;
+	}
+	public static boolean resultOverNormal(int currentProcess,int currentTest,String value) {
+		ResultSet result=select("select Normal.normalId "+
+					"from Patient "+
+					"inner join Normal on  Patient.patientSex =Normal.sex and (select case "+
+					"when Patient.patientAgeType=0 then strftime('%Y','now')-strftime('%Y',(select Patient.patientDOB)) "+
+					"when Patient.patientAgeType=1 then strftime('%m','now')-strftime('%m',(select Patient.patientDOB)) "+
+					"when Patient.patientAgeType=2 then strftime('%d','now')-strftime('%d',(select Patient.patientDOB)) "+
+					"END) between Normal.ageFrom and Normal.ageTo and Normal.testId = "+currentTest+" and "+
+					"('"+value+"' between Normal.normalFrom and Normal.normalTo or '"+value+"'= Normal.normalFrom or '"+value+"'= Normal.normalTo) "+
+					"where Patient.patientId=(select Process.patientId from Process where Process.processId ="+currentProcess+")");
+		try {
+			if(result.next()){
+				boolean x=false;
+				closeCon();
+				return x;
+			}
+		} catch (SQLException|NullPointerException e) {		}
+
+		closeCon();
+		return true;	
 	}
 }

@@ -25,7 +25,7 @@ public class Print implements Initializable{
 	        win.initModality(Modality.APPLICATION_MODAL);	        win.setTitle("Print");
 	        win.getIcons().add(new Image("/design/atom5.png"));		win.setScene(scene);
 	        win.showAndWait();								        win.setAlwaysOnTop(true);
-		} catch (Exception e){System.out.println(e.getMessage());}
+		} catch (Exception e){e.printStackTrace();}
 		
 	}
 }
