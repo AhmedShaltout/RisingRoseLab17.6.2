@@ -25,8 +25,15 @@ import javafx.scene.transform.Scale;
 
 public class PrintControl implements Initializable {
 	
+	public static String[] info;
+	public static ArrayList<Result> SeparatedTests;
+	public static ArrayList<String> namesGroup;
+	public static ArrayList<ArrayList<Result>> groupedTests;
 	@FXML
 	VBox printedBox;
+	@FXML
+	Label printName,printAge,printDate,printReference;
+	
 	private String name="";
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -66,34 +73,37 @@ public class PrintControl implements Initializable {
 	}
 
 	private void makeSeparatedGrid() {
-		ArrayList<Result> separated=WorkPanel.separatedTests;
-		ArrayList<ArrayList<Result>> grouped=WorkPanel.groupedTests;
-		ArrayList<String> groupedNames=WorkPanel.namesGroup;
-		if(!separated.isEmpty()){
-			int s=separated.size()/9;
+		printName.setText(info[0]);
+		printAge.setText(info[1]);
+		printDate.setText(info[2]);
+		printReference.setText(info[3]);
+		if(!SeparatedTests.isEmpty()){
+			int s=SeparatedTests.size()/9;
 			ArrayList<Result>print =new ArrayList<>();
 			if(s>=9){
 				for(int z=0;z<9;z++){
-					print.add(separated.remove(z));
+					print.add(SeparatedTests.remove(z));
 				}
 				createGrid(print,false);
-				if(!separated.isEmpty())
+				if(!SeparatedTests.isEmpty())
 					new Print();
 			}else{
-				for (Result result : separated) {
+				for (Result result : SeparatedTests) {
 					print.add(result);
 				}
-				separated.removeAll(print);
+				SeparatedTests.removeAll(print);
 				createGrid(print,false);
+				if(!SeparatedTests.isEmpty())
 				new Print();
 			}
 		}
-		if(!grouped.isEmpty()){
-			if(!grouped.get(0).isEmpty()){
-				name=groupedNames.remove(0);
-				createGrid(grouped.remove(0),true);
-				if(!grouped.isEmpty())
-					new Print();
+		if(!groupedTests.isEmpty()){
+			if(!groupedTests.get(0).isEmpty()){
+				name=namesGroup.remove(0);
+				createGrid(groupedTests.remove(0),true);
+				if(!groupedTests.isEmpty())
+					if(!groupedTests.get(0).isEmpty())
+						new Print();
 			}
 		}
 	}

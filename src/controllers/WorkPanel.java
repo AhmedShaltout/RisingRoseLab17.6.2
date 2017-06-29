@@ -185,7 +185,11 @@ public class WorkPanel implements Initializable {
 							processVBox.getChildren().add(grid);
 						}
 		        	}else if(val.toString().equals("Print")){
-		        		Exceptions.showInfo("Will add printer later");
+		        		PrintControl.groupedTests=DB.getProcessGroupsResult(process.getProcessId());
+		        		DB.getPrintInfo(process.getProcessId());
+		        		PrintControl.namesGroup=DB.groupsName;
+		        		PrintControl.SeparatedTests=DB.getProcessTestsResult(process.getProcessId());
+		        		new Print();
 		        	}else if(val.toString().equals("Pay")){
 		        		Exceptions.getPaid(process.getProcessId());patientHistory.setItems(FXCollections.observableList(DB.getPatientProcess(x)));
 		        		patientHistory.refresh();
@@ -294,6 +298,8 @@ public class WorkPanel implements Initializable {
 				Exceptions.showInfo("No such Process");
 				processId.setText("");
 				processVBox.getChildren().removeAll(processVBox.getChildren());
+			}else{
+				currentProcess=Integer.parseInt(s);
 			}
 		}
 	}
@@ -387,10 +393,12 @@ public class WorkPanel implements Initializable {
 		for (Result result : results2) {
 			results3.add(result);
 		}
-		separatedTests=results3;
-		namesGroup=groupsName;
-		groupedTests=results;
+		PrintControl.SeparatedTests=results3;
+		PrintControl.namesGroup=groupsName;
+		PrintControl.groupedTests=results;
+		DB.getPrintInfo(currentProcess);
 		new Print();
+		
 	}
 	///////////////////////add patient///////////////////
 	

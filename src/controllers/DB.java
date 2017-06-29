@@ -696,4 +696,23 @@ public abstract class DB {
 		closeCon();
 		return true;	
 	}
+	public static void getPrintInfo(int currentProcess) {
+		String[]info=new String[4];
+		ResultSet result=select("select Patient.patientName ,case "+
+			" when Patient.patientAgeType=0 then (strftime('%Y','now')-strftime('%Y',(select Patient.patientDOB)))||' Years' "+
+			" when Patient.patientAgeType=1 then (strftime('%m','now')-strftime('%m',(select Patient.patientDOB)))||' Months' "+
+			" when Patient.patientAgeType=2 then (strftime('%d','now')-strftime('%d',(select Patient.patientDOB)))||' Days' "+
+			" END, Process.processOutDate,ProcessReference.processReference from Patient inner join Process on Process.patientId=Patient.patientId "+
+			" left join ProcessReference on ProcessReference.processId=Process.processId where Process.processId="+currentProcess+"");
+		try {
+			result.next();
+			info[0]=result.getString(1);
+			info[1]=result.getString(2);
+			info[2]=result.getString(3);
+			info[3]=result.getString(4);
+		} catch (SQLException|NullPointerException e) {
+		}
+		closeCon();
+		PrintControl.info=info;
+	}
 }
